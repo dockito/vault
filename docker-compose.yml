@@ -1,0 +1,10 @@
+web:
+  build: .
+  volumes:
+    - .:/usr/src/app
+    - /vault:/vault
+  ports:
+    - 3000
+  environment:
+    VIRTUAL_HOST: vault.local.dockito.org
+    VIRTUAL_PORT: 3000
