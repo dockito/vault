@@ -1,15 +1,13 @@
 #!/bin/bash
 
-echo " ---> [Dockito Vault] Downloading private keys..."
-
 mkdir -p ~/.ssh/
 
-curl -o ~/.ssh/id_rsa.pub http://172.17.42.1:14242/.ssh/id_rsa.pub
-curl -o ~/.ssh/id_rsa http://172.17.42.1:14242/.ssh/id_rsa
-echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+echo " ---> [Dockito Vault] Downloading private keys..."
 
-chmod 0600 ~/.ssh/id_rsa.pub
-chmod 0600 ~/.ssh/id_rsa
+TEMP_FILE=`mktemp -q /tmp/ssh.XXXXXX`
+curl -o $TEMP_FILE http://172.17.42.1:14242/ssh.tgz
+tar xzf $TEMP_FILE -C ~/.ssh/
+chown `whoami` ~/.ssh/*
 
 echo " ---> [Dockito Vault] Executing command: $@"
 
@@ -17,6 +15,4 @@ eval $@
 
 echo " ---> [Dockito Vault] Removing private keys..."
 
-rm ~/.ssh/id_rsa.pub
-rm ~/.ssh/id_rsa
-rm ~/.ssh/config
+rm -rf ~/.ssh/*
