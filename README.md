@@ -21,8 +21,6 @@ There is also a `docker-compose.yml` file in this project, allowing you to run i
 docker-compose up vault
 ```
 
-It expects that there will be a `/vault/.ssh` folder containing your private keys and SSH configuration.
-
 ## The Dockerfile
 
 During build, you can use the `ONVAULT` utility to run any command using the private keys.
