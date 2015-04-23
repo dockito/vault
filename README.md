@@ -12,7 +12,7 @@ It is composed of two pieces:
 Run the server setting a volume to your `~/.ssh` folder:
 
 ```bash
-docker run -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault bash
+docker run -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault
 ```
 
 There is also a `docker-compose.yml` file in this project, allowing you to run it (by cloning the project) with:
