@@ -2,6 +2,6 @@ vault:
   build: .
   volumes:
     - .:/usr/src/app
-    - /vault:/vault
+    - ~/.ssh:/vault/.ssh
   ports:
     - 172.17.42.1:14242:3000
