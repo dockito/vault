@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# signals bash to stop execution on any fail
+set -e
+
 mkdir -p ~/.ssh/
 
 echo " ---> [Dockito Vault] Downloading private keys..."
