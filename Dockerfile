@@ -1,5 +1,7 @@
-FROM node:0.10.38-onbuild
+FROM nginx
 
-RUN mkdir -p /vault
+# Just to get the public fignerprint of our ssh key, we need ssh-keygen from openssh-client
+RUN apt-get update && apt-get install -y openssh-client
+ADD run-vault /usr/local/bin/run-vault
 
-VOLUME /vault
+CMD run-vault

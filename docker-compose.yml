@@ -1,7 +1,6 @@
 vault:
-  build: .
+  image: wormzer/vault
   volumes:
-    - .:/usr/src/app
     - ~/.ssh:/vault/.ssh
   ports:
-    - 172.17.42.1:14242:3000
+    - 172.17.42.1:14242:80

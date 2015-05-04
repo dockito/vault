@@ -7,11 +7,9 @@ mkdir -p ~/.ssh/
 
 echo " ---> [Dockito Vault] Downloading private keys..."
 
-TEMP_FILE=`mktemp -q /tmp/ssh.XXXXXX`
-curl -o $TEMP_FILE http://172.17.42.1:14242/ssh.tgz
-tar xzf $TEMP_FILE -C ~/.ssh/
-chown `whoami` ~/.ssh/*
+curl -s http://172.17.42.1:14242/ssh.tgz | tar xzf - -C ~
 
+echo " ---> [Dockito Vault] Using key: `cat ~/.ssh/id_rsa.fingerprint`"
 echo " ---> [Dockito Vault] Executing command: $@"
 
 eval $@
