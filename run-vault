@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -eu
+
+# if the host has a ~/.ssh/vault directory, use it. Otherwise, we grab up the default ~/.ssh/id_rsa
+if [ -d /vault/.ssh/vault ]
+then
+  cp -r /vault/.ssh/vault/ /tmp/.ssh/
+else
+  mkdir -p /tmp/.ssh
+  cp ~/.ssh/id_rsa /tmp/.ssh
+fi
+
+# set up a basic ssh config by default
+[ -f /tmp/.ssh/config ] || echo "StrictHostKeyChecking no" > /tmp/.ssh/config
+
+# create a public key from private
+ssh-keygen -y -f /tmp/.ssh/id_rsa > /tmp/.ssh/id_rsa.pub
+ssh-keygen -lf /tmp/.ssh/id_rsa.pub | cut -d\  -f2 > /tmp/.ssh/id_rsa.fingerprint
+
+# ssh-acceptable permissions
+chmod -R go-rwx /tmp/.ssh
+
+tar cfz /usr/share/nginx/html/ssh.tgz -C /tmp .ssh/
+
+# clean up
+rm -rf /tmp/.ssh
+
+nginx -g 'daemon off;'

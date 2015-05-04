@@ -9,7 +9,8 @@ It is composed of two pieces:
 
 ## The private keys server
 
-Run the server setting a volume to your `~/.ssh` folder:
+Run the server setting a volume to your `~/.ssh` folder. NOTE: if you need to use a key other than ~/.ssh/id_rsa have
+it in a folder named ~/.ssh/vault on the host. Also a custom ssh config can be smuggled in as ~/.ssh/vault/config if required.
 
 ```bash
 docker run -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault
