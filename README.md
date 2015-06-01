@@ -2,23 +2,10 @@
 
 A solution to use SSH keys while building images.
 
-It is composed of two pieces:
+Here is an example installing [Node.js](http://nodejs.org/) dependencies:
 
-- an HTTP server running at http://172.17.42.1:14242 that serves the private keys;
-- a bash script `ONVAULT` that need to be installed in the image to allow accessing the private keys during the build process.
-
-## The private keys server
-
-Run the server setting a volume to your `~/.ssh` folder:
-
-```bash
-docker run -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault
-```
-
-There is also a `docker-compose.yml` file in this project, allowing you to run it (by cloning the project) with:
-
-```bash
-docker-compose up vault
+```Dockerfile
+RUN ONVAULT npm install
 ```
 
 ## The Dockerfile
@@ -38,7 +25,7 @@ RUN apt-get update -y && \
     chmod +x /usr/local/bin/ONVAULT
 ```
 
-The script only dependency is `curl` (being installed above).
+The script's only dependency is `curl` (being installed above).
 
 Then use it on any command that requires the private keys:
 
@@ -66,6 +53,27 @@ RUN ONVAULT npm install --unsafe-perm
 COPY . /usr/src/app
 
 CMD [ "npm", "start" ]
+```
+
+## How it works
+
+It is composed of two pieces:
+
+- an HTTP server running at http://172.17.42.1:14242 that serves the private keys;
+- a bash script `ONVAULT` that need to be installed in the image to allow accessing the private keys during the build process.
+
+### The private keys server
+
+Run the server setting a volume to your `~/.ssh` folder:
+
+```bash
+docker run -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault
+```
+
+There is also a `docker-compose.yml` file in this project, allowing you to run it (by cloning the project) with:
+
+```bash
+docker-compose up vault
 ```
 
 Happy codding!
