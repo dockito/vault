@@ -10,7 +10,7 @@ if curl -s "${VAULT_URI}/_ping"; then
   echo " ---> [Dockito Vault] Downloading private keys..."
 
   mkdir -p ~/.ssh/
-  curl "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
+  curl -s "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
   chown `whoami` ~/.ssh/*
 
   echo " ---> [Dockito Vault] Executing command: $@"
