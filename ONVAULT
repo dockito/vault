@@ -21,4 +21,5 @@ if curl -s "${VAULT_URI}/_ping"; then
 else
   echo " ---> [Dockito Vault] ERROR: Start the dockito/vault container before using ONVAULT!"
   echo " ---> [Dockito Vault] ex: docker run -d -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault"
+  exit 1
 fi
