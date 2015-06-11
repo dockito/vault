@@ -6,20 +6,26 @@ set -e
 # allow overriding default VAULT_URI at runtime
 : ${VAULT_URI:=http://172.17.42.1:14242}
 
+log () {
+  GREEN='\033[1;32m'
+  NC='\033[0m' # No Color
+  echo -e "${GREEN}[Dockito Vault]${NC} $1"
+}
+
 if curl -s "${VAULT_URI}/_ping"; then
-  echo " ---> [Dockito Vault] Downloading private keys..."
+  log "Downloading private keys..."
 
   mkdir -p ~/.ssh/
   curl -s "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
   chown `whoami` ~/.ssh/*
 
-  echo " ---> [Dockito Vault] Executing command: $@"
+  log "Executing command: $@"
   eval $@
 
-  echo " ---> [Dockito Vault] Removing private keys..."
+  log "Removing private keys..."
   rm -rf ~/.ssh/*
 else
-  echo " ---> [Dockito Vault] ERROR: Start the dockito/vault container before using ONVAULT!"
-  echo " ---> [Dockito Vault] ex: docker run -d -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault"
+  log "ERROR: Start the dockito/vault container before using ONVAULT!"
+  log "ex: docker run -d -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault"
   exit 1
 fi
