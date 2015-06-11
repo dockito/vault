@@ -62,6 +62,8 @@ It is composed of two pieces:
 - an HTTP server running at http://172.17.42.1:14242 that serves the private keys;
 - a bash script `ONVAULT` that need to be installed in the image to allow accessing the private keys during the build process.
 
+The `ONVAULT` script accepts a custom URI for the vault server through the environment variable `VAULT_URI`.
+
 ### The private keys server
 
 Run the server setting a volume to your `~/.ssh` folder:
