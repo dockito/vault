@@ -9,7 +9,7 @@ set -e
 log () {
   GREEN='\033[1;32m'
   NC='\033[0m' # No Color
-  echo -e "${GREEN}[Dockito Vault]${NC} $1"
+  echo -e "${GREEN}[Dockito Vault]${NC} $@"
 }
 
 if curl -s "${VAULT_URI}/_ping"; then
