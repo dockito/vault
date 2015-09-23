@@ -6,6 +6,9 @@ set -e
 # allow overriding default VAULT_URI at runtime
 : ${VAULT_URI:=http://172.17.42.1:14242}
 
+# allow overriding default VAULT_SSH_KEY at runtime
+: ${VAULT_SSH_KEY:=id_rsa}
+
 log () {
   GREEN='\033[1;32m'
   NC='\033[0m' # No Color
@@ -18,6 +21,12 @@ if curl -s "${VAULT_URI}/_ping"; then
   mkdir -p ~/.ssh/
   curl -s "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
   chown `whoami` ~/.ssh/*
+
+  log "Using ssh key: $VAULT_SSH_KEY"
+  if [[  "$VAULT_SSH_KEY" != "id_rsa" ]]; then
+    # configure the ssh to any host to use this ssh key
+    echo -e "\nHost *\nIdentityFile ~/.ssh/$VAULT_SSH_KEY" >> ~/.ssh/config
+  fi
 
   log "Executing command: $@"
   eval $@
