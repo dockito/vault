@@ -64,10 +64,31 @@ It is composed of two pieces:
 
 ### Custom configurations
 
+#### Environment variables
+
 Some custom configurations are allowed through environment variables
 
 - `VAULT_URI`: custom URI for the vault server
 - `VAULT_SSH_KEY`: custom ssh key name used during `ONVAULT` command
+
+#### SSH config file
+
+Other ssh configurations can be achieved though your own [ssh config file](http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/ssh_config.5?query=ssh_config&sec=5). Since the vault has access to the whole `.ssh` directory the ssh config file is available when running the `ONVAULT` command. Which means any configuration in the ssh config file will be applied to the ssh connection.
+
+An example where you could use the ssh config file is when you need use different private keys for different hosts.
+
+**~/.ssh/config**
+```
+# use this key for github host
+Host github.com
+IdentityFile ~/.ssh/github_docker_key
+
+# or use this key for my myprivatehost.com
+Host myprivatehost.com
+IdentityFile ~/.ssh/myprivatehost_key
+
+# otherwise will use the id_rsa key for any other host
+```
 
 ### The private keys server
 
