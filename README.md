@@ -78,6 +78,7 @@ Other ssh configurations can be achieved through your own [ssh config file](http
 An example where you could use the ssh config file is when you need use different private keys for different hosts.
 
 **~/.ssh/config**
+
 ```
 # use this key for github host
 Host github.com
