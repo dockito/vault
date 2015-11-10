@@ -107,6 +107,17 @@ docker-compose up vault
 
 Happy codding!
 
+## Development
+
+Because [NPM](http://npmjs.com/) dependencies are installed locally, the dependencies installed in the base-image won't be available in development time, so you will need to `npm install` them again:
+
+```
+git clone https://github.com/dockito/vault.git
+cd vault
+docker-compose run vault npm install
+docker-compose up vault
+```
+
 ## Drawbacks
 
 A Dockerfile using this technique requires the special **vault service** running. Meaning it is not possible to run any build process at the [Docker Hub](https://hub.docker.com/).
