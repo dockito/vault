@@ -106,6 +106,16 @@ docker-compose up vault
 
 Happy codding!
 
+## Usage in runtime
+
+Although its main purpose is to fix the issue of building Docker images, it can also be used as a source of secrets for some running container:
+
+
+```bash
+docker run -v ~/.ssh:/vault/.ssh --name vault dockito/vault
+docker run --link vault image-with-onvault ONVAULT npm install --unsafe-perm
+```
+
 ## Drawbacks
 
 A Dockerfile using this technique requires the special **vault service** running. Meaning it is not possible to run any build process at the [Docker Hub](https://hub.docker.com/).

@@ -3,8 +3,11 @@
 # signals bash to stop execution on any fail
 set -e
 
+# allow overriding (probably trough Docker Link) default VAULT_PORT at runtime
+: ${VAULT_PORT:=tcp://172.17.42.1:14242}
+
 # allow overriding default VAULT_URI at runtime
-: ${VAULT_URI:=http://172.17.42.1:14242}
+: ${VAULT_URI:=${VAULT_PORT/tcp/http}}
 
 # allow overriding default VAULT_SSH_KEY at runtime
 : ${VAULT_SSH_KEY:=id_rsa}
