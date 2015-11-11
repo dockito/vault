@@ -78,6 +78,7 @@ Other ssh configurations can be achieved through your own [ssh config file](http
 An example where you could use the ssh config file is when you need use different private keys for different hosts.
 
 **~/.ssh/config**
+
 ```
 # use this key for github host
 Host github.com
@@ -114,6 +115,17 @@ Although its main purpose is to fix the issue of building Docker images, it can 
 ```bash
 docker run -v ~/.ssh:/vault/.ssh --name vault dockito/vault
 docker run --link vault image-with-onvault ONVAULT npm install --unsafe-perm
+```
+
+## Development
+
+Because [NPM](http://npmjs.com/) dependencies are installed locally, the dependencies installed in the base-image won't be available in development time, so you will need to `npm install` them again:
+
+```
+git clone https://github.com/dockito/vault.git
+cd vault
+docker-compose run vault npm install
+docker-compose up vault
 ```
 
 ## Drawbacks
