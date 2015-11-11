@@ -21,7 +21,7 @@ runtime-vault:
 runtime-dependency:
   build: sample-project
   working_dir: /app
-  # entrypoint: ./ONVAULT
+  entrypoint: ./ONVAULT
   command: ls
   volumes:
     - .:/app
