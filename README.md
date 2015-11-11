@@ -107,6 +107,16 @@ docker-compose up vault
 
 Happy codding!
 
+## Usage in runtime
+
+Although its main purpose is to fix the issue of building Docker images, it can also be used as a source of secrets for some running container:
+
+
+```bash
+docker run -v ~/.ssh:/vault/.ssh --name vault dockito/vault
+docker run --link vault image-with-onvault ONVAULT npm install --unsafe-perm
+```
+
 ## Development
 
 Because [NPM](http://npmjs.com/) dependencies are installed locally, the dependencies installed in the base-image won't be available in development time, so you will need to `npm install` them again:

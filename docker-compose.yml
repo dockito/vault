@@ -1,3 +1,5 @@
+# vault to be used as a service in build time
+# must have a fixed IP and Port for discovery
 vault:
   build: .
   volumes:
@@ -5,3 +7,23 @@ vault:
     - ~/.ssh:/vault/.ssh
   ports:
     - 172.17.42.1:14242:3000
+
+# vault to be used as a linked container in runtime
+runtime-vault:
+  build: .
+  volumes:
+    - .:/usr/src/app
+    - ~/.ssh:/vault/.ssh
+  ports:
+    - 3000
+
+# Uses Vault in runtime
+runtime-dependency:
+  build: sample-project
+  working_dir: /app
+  # entrypoint: ./ONVAULT
+  command: ls
+  volumes:
+    - .:/app
+  links:
+    - runtime-vault:vault
