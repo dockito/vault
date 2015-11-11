@@ -19,9 +19,11 @@ log () {
 }
 
 if ! curl -s "${VAULT_URI}/_ping"; then
+  COUNTER=0
   echo 'Waiting for dockito/vault to be ready...'
-  while ! curl -s "${VAULT_URI}/_ping"; do
+  while ! curl -s "${VAULT_URI}/_ping" && [ $COUNTER != 10 ]; do
     sleep 1
+    COUNTER=$[$COUNTER +1]
   done
 fi
 
