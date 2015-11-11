@@ -18,6 +18,15 @@ log () {
   echo -e "${GREEN}[Dockito Vault]${NC} $@"
 }
 
+if ! curl -s "${VAULT_URI}/_ping"; then
+  COUNTER=0
+  echo 'Waiting 10s for dockito/vault to be ready...'
+  while ! curl -s "${VAULT_URI}/_ping" && [ $COUNTER != 10 ]; do
+    sleep 1
+    COUNTER=$[$COUNTER +1]
+  done
+fi
+
 if curl -s "${VAULT_URI}/_ping"; then
   log "Downloading private keys..."
 
