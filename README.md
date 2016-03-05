@@ -59,8 +59,14 @@ CMD [ "npm", "start" ]
 
 It is composed of two pieces:
 
-- an HTTP server running at http://172.17.42.1:14242 that serves the private keys;
+- an HTTP server running at http://172.17.0.1:14242 that serves the private keys;
 - a bash script `ONVAULT` that need to be installed in the image to allow accessing the private keys during the build process.
+
+> The server IP may be different depending in the docker version your are running or if you are using a custom bridge network for docker. Execute this command below find out the ip used by docker:
+
+```bash
+ifconfig docker0 | grep 'inet ' | cut -d: -f2 | awk '{ print $2}'
+```
 
 ### Custom configurations
 
@@ -68,6 +74,7 @@ It is composed of two pieces:
 
 Some custom configurations are allowed through environment variables
 
+- `VAULT_HOST`: custom host for the vault server (example `172.17.0.1`)
 - `VAULT_PORT`: custom host+port for the vault server (example `tcp:172.17.0.1:14242`)
 - `VAULT_URI`: custom URI for the vault server (example `http://172.17.0.1:14242`)
 - `VAULT_SSH_KEY`: custom ssh key name used during `ONVAULT` command (example `id_rsa`)
@@ -97,8 +104,10 @@ IdentityFile ~/.ssh/myprivatehost_key
 Run the server setting a volume to your `~/.ssh` folder:
 
 ```bash
-docker run -p 172.17.42.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault
+docker run -p 172.17.0.1:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault
 ```
+
+> This ip may be different. Check out the "How it works" session to find out the right ip in case this one is not working for you.
 
 There is also a `docker-compose.yml` file in this project, allowing you to run it (by cloning the project) with:
 
