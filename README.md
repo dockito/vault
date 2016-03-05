@@ -62,7 +62,7 @@ It is composed of two pieces:
 - an HTTP server running at http://172.17.0.1:14242 that serves the private keys;
 - a bash script `ONVAULT` that need to be installed in the image to allow accessing the private keys during the build process.
 
-> The server IP may be different depending in the docker version your are running or if you are using a custom bridge network for docker. Execute this command below find out the ip used by docker:
+> The server IP may be different depending in the docker version your are running or if you are using a custom bridge network for docker. Execute this command below to find out the ip used by docker:
 
 ```bash
 ifconfig docker0 | grep 'inet ' | cut -d: -f2 | awk '{ print $2}'
