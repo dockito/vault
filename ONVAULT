@@ -3,6 +3,8 @@
 # signals bash to stop execution on any fail
 set -e
 
+# allow everriding default VAULT_HOST at runtime
+# otherwise will get the docker bridge ip network
 : ${VAULT_HOST:=$(ip route|awk '/default/{print $3}')}
 
 # allow overriding (probably trough Docker Link) default VAULT_PORT at runtime
