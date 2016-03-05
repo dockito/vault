@@ -68,8 +68,9 @@ It is composed of two pieces:
 
 Some custom configurations are allowed through environment variables
 
-- `VAULT_URI`: custom URI for the vault server
-- `VAULT_SSH_KEY`: custom ssh key name used during `ONVAULT` command
+- `VAULT_PORT`: custom host+port for the vault server (example `tcp:172.17.0.1:14242`)
+- `VAULT_URI`: custom URI for the vault server (example `http://172.17.0.1:14242`)
+- `VAULT_SSH_KEY`: custom ssh key name used during `ONVAULT` command (example `id_rsa`)
 
 #### SSH config file
 
