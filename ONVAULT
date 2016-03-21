@@ -32,9 +32,13 @@ if ! curl -s "${VAULT_URI}/_ping"; then
 fi
 
 if curl -s "${VAULT_URI}/_ping"; then
-  log "Downloading private keys..."
-
   mkdir -p ~/.ssh/
+
+  # creating backup of existing ssh directory
+  tmp_ssh_vault=`mktemp -d ~/.vault-backup-ssh-XXXX`
+  cp -r ~/.ssh/* $tmp_ssh_vault
+
+  log "Downloading private keys..."
   curl -s "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
   chown `whoami` ~/.ssh/*
 
@@ -49,6 +53,10 @@ if curl -s "${VAULT_URI}/_ping"; then
 
   log "Removing private keys..."
   rm -rf ~/.ssh/*
+
+  # copying backup to ssh directory
+  cp -r $tmp_ssh_vault/* ~/.ssh
+  rm -rf $tmp_ssh_vault
 else
   log "ERROR: Start the dockito/vault container before using ONVAULT!"
   log "ex: docker run -d -p ${VAULT_HOST}:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault"
