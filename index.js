@@ -24,7 +24,7 @@ app.get('/ssh.tgz', function (req, res) {
   exec('mktemp -q /tmp/ssh.XXXXXX', function (err, stdout) {
     var file = stdout.match(/(.+)/)[0];
 
-    exec('tar -c -z -C /vault/.ssh -f '+ file +' .', function (err, stdout, stderr) {
+    exec('tar -chz -C /vault/.ssh -f '+ file +' .', function (err, stdout, stderr) {
       var filename = path.basename(file);
       var mimetype = mime.lookup(file);
 

@@ -99,6 +99,10 @@ IdentityFile ~/.ssh/myprivatehost_key
 # otherwise will use the id_rsa key for any other host
 ```
 
+#### Symlinks
+
+In case you have symlink for any ssh file. Will be necessary map the volume of the symlink destination into the docker vault server. Otherwise will not be possible to resolve the symlink while copying the ssh files with the `ONVAULT` command.
+
 ### The private keys server
 
 Run the server setting a volume to your `~/.ssh` folder:
