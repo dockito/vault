@@ -34,9 +34,14 @@ fi
 if curl -s "${VAULT_URI}/_ping"; then
   mkdir -p ~/.ssh/
 
+  # check if is required the ssh backup
+  ssh_backup_enabled="$(ls -A ~/.ssh)"
+
   # creating backup of existing ssh directory
-  tmp_ssh_vault=`mktemp -d ~/.vault-backup-ssh-XXXX`
-  cp -r ~/.ssh/* $tmp_ssh_vault
+  if [[ -n "$ssh_backup_enabled" ]]; then
+    tmp_ssh_vault=`mktemp -d ~/.vault-backup-ssh-XXXX`
+    cp -r ~/.ssh/* $tmp_ssh_vault
+  fi
 
   log "Downloading private keys..."
   curl -s "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
@@ -55,8 +60,10 @@ if curl -s "${VAULT_URI}/_ping"; then
   rm -rf ~/.ssh/*
 
   # copying backup to ssh directory
-  cp -r $tmp_ssh_vault/* ~/.ssh
-  rm -rf $tmp_ssh_vault
+  if [[ -n "$ssh_backup_enabled" ]]; then
+    cp -r $tmp_ssh_vault/* ~/.ssh
+    rm -rf $tmp_ssh_vault
+  fi
 else
   log "ERROR: Start the dockito/vault container before using ONVAULT!"
   log "ex: docker run -d -p ${VAULT_HOST}:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault"
