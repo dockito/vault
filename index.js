@@ -3,6 +3,7 @@ var express = require('express'),
     exec = require('child_process').exec,
     mime = require('mime'),
     path = require('path'),
+    touch = require("touch"),
     mkdirp = require('mkdirp');
 
 
@@ -38,6 +39,23 @@ app.get('/ssh.tgz', function (req, res) {
       fs.unlink(file)
     });
   });
+});
+
+
+/**
+  Route to get the credenial store
+ */
+app.get('/git-credentials', function (req, res) {
+  var file = '/vault/store/git-credentials';
+  touch(file);
+  var filename = path.basename(file);
+  var mimetype = mime.lookup(file);
+
+  res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+  res.setHeader('Content-type', mimetype);
+
+  var filestream = fs.createReadStream(file);
+  filestream.pipe(res);
 });
 
 
