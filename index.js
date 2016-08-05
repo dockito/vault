@@ -33,6 +33,7 @@ app.get('/ssh.tgz', function (req, res) {
 
       var filestream = fs.createReadStream(file);
       filestream.pipe(res);
+      fs.unlink(file)
     });
   });
 });
