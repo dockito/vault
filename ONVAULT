@@ -43,7 +43,7 @@ if curl -s "${VAULT_URI}/_ping"; then
 
   # creating backup of existing ssh directory
   if [[ -n "$ssh_backup_enabled" ]]; then
-    tmp_ssh_vault="~/.vault-backup-ssh-$(date +%s)"
+    tmp_ssh_vault=~/".vault-backup-ssh-$(date +%s)"
     mkdir $tmp_ssh_vault
     cp -r ~/.ssh/* $tmp_ssh_vault
   fi
