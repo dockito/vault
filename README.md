@@ -14,7 +14,7 @@ During build, you can use the `ONVAULT` utility to run any command using the pri
 
 **The private keys are removed automatically after the command completes**.
 
-First you need to install the `ONVAULT` utility, by adding the following statements in your Dockerfile:
+First you need to install the `ONVAULT` utility, by adding the following statements in your Dockerfile (example works for Debian/Ubuntu):
 
 ```Dockerfile
 # installs Dockito Vault ONVAULT utility
@@ -26,6 +26,16 @@ RUN apt-get update -y && \
 ```
 
 The script's only dependency is `curl` (being installed above).
+
+Or on Alpine Linux:
+
+```Dockerfile
+# installs Dockito Vault ONVAULT utility
+# https://github.com/dockito/vault
+RUN apk add -Uuv bash curl && \
+    curl -L https://raw.githubusercontent.com/dockito/vault/master/ONVAULT > /usr/local/bin/ONVAULT && \
+    chmod +x /usr/local/bin/ONVAULT
+```
 
 Then use it on any command that requires the private keys:
 
@@ -145,6 +155,15 @@ docker-compose up vault
 ## Drawbacks
 
 A Dockerfile using this technique requires the special **vault service** running. Meaning it is not possible to run any build process at the [Docker Hub](https://hub.docker.com/).
+
+Also note that password protected SSH keys will not work. If you use SSH verbosity will get an error like this:
+
+```
+debug1: read_passphrase: can't open /dev/tty: No such device or address
+Host key verification failed.
+```
+
+As the **vault service** is not running an `ssh-agent` (instead copying the contents of files), the password cannot be entered prior to execution.
 
 ## Acknowledgements
 
