@@ -16,6 +16,13 @@ set -e
 # allow overriding default VAULT_SSH_KEY at runtime
 : ${VAULT_SSH_KEY:=id_rsa}
 
+# parse arguments
+while [[ "$#" > 1 ]]; do case $1 in
+    --disable-pwd) DISABLE_PASSWORD="$2";;
+    *) break;;
+  esac; shift; shift
+done
+
 log () {
   GREEN='\033[1;32m'
   NC='\033[0m' # No Color
@@ -57,6 +64,10 @@ if curl -s "${VAULT_URI}/_ping"; then
   if [[  "$VAULT_SSH_KEY" != "id_rsa" ]]; then
     # configure the ssh to any host to use this ssh key
     echo -e "\nHost *\nIdentityFile ~/.ssh/$VAULT_SSH_KEY" >> ~/.ssh/config
+  fi
+
+  if [[ "$DISABLE_PASSWORD" != "" ]]; then
+    ssh-keygen -p -P $DISABLE_PASSWORD -N "" -f ~/.ssh/$VAULT_SSH_KEY
   fi
 
   # restore 'no_proxy' for executing the actual command
