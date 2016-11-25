@@ -109,6 +109,15 @@ IdentityFile ~/.ssh/myprivatehost_key
 # otherwise will use the id_rsa key for any other host
 ```
 
+#### SSH key password/passphrase
+
+If your key is protected by passphrase, you can pass to ONVAULT the passphrase, so it before use the key will remove the
+password at the container.
+
+```
+ONVAULT --disable-pwd %password% npm install
+```
+
 #### Symlinks
 
 In case you have symlink for any ssh file. Will be necessary map the volume of the symlink destination into the docker vault server. Otherwise will not be possible to resolve the symlink while copying the ssh files with the `ONVAULT` command.
@@ -154,14 +163,8 @@ docker-compose up vault
 
 ## Drawbacks
 
-A Dockerfile using this technique requires the special **vault service** running. Meaning it is not possible to run any build process at the [Docker Hub](https://hub.docker.com/).
-
-Also note that password protected SSH keys will not work. If you use SSH verbosity will get an error like this:
-
-```
-debug1: read_passphrase: can't open /dev/tty: No such device or address
-Host key verification failed.
-```
+A Dockerfile using this technique requires the special **vault service** running. Meaning it is not possible to run any
+build process at the [Docker Hub](https://hub.docker.com/).
 
 As the **vault service** is not running an `ssh-agent` (instead copying the contents of files), the password cannot be entered prior to execution.
 
