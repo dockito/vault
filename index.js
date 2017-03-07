@@ -18,26 +18,34 @@ app.get('/_ping', function (req, res) {
 });
 
 
+var keyDirs = (process.env.VAULT_DIRS || 'ssh').split(' ');
+
 /**
-  Bundle containing all the user's private keys and ssh configuration
+  Bundle containing all the user's private keys and "keyDir" configuration
  */
-app.get('/ssh.tgz', function (req, res) {
-  mkdirp("/vault/.ssh");
-  exec('mktemp -q /tmp/ssh.XXXXXX', function (err, stdout) {
-    var file = stdout.match(/(.+)/)[0];
+app.get('/:keyDir\.tgz', function (req, res) {
+  keyDir = req.params.keyDir;
 
-    exec('tar -chz -C /vault/.ssh -f '+ file +' .', function (err, stdout, stderr) {
-      var filename = path.basename(file);
-      var mimetype = mime.lookup(file);
+  if (keyDirs.indexOf(keyDir) == -1) {
+    res.status(404).send('Not found');
+  } else {
+    mkdirp("/vault/." + keyDir);
+    exec('mktemp -q /tmp/key_dir.XXXXXX', function (err, stdout) {
+      var file = stdout.match(/(.+)/)[0];
 
-      res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-      res.setHeader('Content-type', mimetype);
+      exec('tar -chz -C /vault/.' + keyDir + ' -f '+ file +' .', function (err, stdout, stderr) {
+        var filename = path.basename(file);
+        var mimetype = mime.lookup(file);
 
-      var filestream = fs.createReadStream(file);
-      filestream.pipe(res);
-      fs.unlink(file)
+        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+        res.setHeader('Content-type', mimetype);
+
+        var filestream = fs.createReadStream(file);
+        filestream.pipe(res);
+        fs.unlink(file)
+      });
     });
-  });
+  }
 });
 
 
