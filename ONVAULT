@@ -19,6 +19,7 @@ set -e
 # allow multiple dot directories to be managed
 : ${VAULT_DIRS:=ssh}
 
+# just for documentation
 : ${VAULT_IMAGE:=dockito/vault}
 
 # parse arguments
