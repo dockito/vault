@@ -22,6 +22,9 @@ set -e
 # just for documentation
 : ${VAULT_IMAGE:=dockito/vault}
 
+# allow multiple dot directories to be managed
+: ${VAULT_BUNDLE_CREDENTIALS:=}
+
 # parse arguments
 while [[ "$#" > 1 ]]; do case $1 in
     --disable-pwd) DISABLE_PASSWORD="$2";;
@@ -48,19 +51,33 @@ if ! curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
   done
 fi
 
+
 if curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
   log "Downloading private keys..."
   tmp_vault=~/".vault-backup-$(date +%s)"
-	mkdir $tmp_vault
+  mkdir $tmp_vault
   for vault_dir in $VAULT_DIRS; do
     if [[ -e ~/.${vault_dir} ]]; then
       mv ~/.${vault_dir} ${tmp_vault}
     fi
-		mkdir ~/.${vault_dir}
+    mkdir ~/.${vault_dir}
 
     curl -s "${VAULT_URI}/${vault_dir}.tgz" | tar -C ~/.${vault_dir}/ -zxf -
     chown -f `whoami` ~/.${vault_dir}/* || true
     chmod -f 600 ~/.${vault_dir}/* || true
+
+    if [[ ${vault_dir} == bundle ]]; then
+      # more special handling of that nasty .bundle/config file. We ONLY want to bring over credentials, but the format
+      # for credentials is rather open-ended. Example: credentials for google.com would be stored as BUNDLE_GOOGLE__COM: "username:password"
+      # We solve this by allowing for a VAULT_BUNDLE_CREDENTIALS environment varialbe that is a space-deliminted list
+      # of gem server hostnames. This list will be transformed into these BUNDLE_HOSTNAME__WITH__UNDERLINES and used as a grep
+      # filter to filter out ALL OTHER lines in the ~/.bundle config. We do not want actual bundler configuration items
+      # such as BUNDLE_BUILD... or BUNDLE_PATH... or BUNDLE_WITHOUT to affect our build.
+      bundle_config_filter=$(tr '[:lower:]' '[:upper:]' <<< $VAULT_BUNDLE_CREDENTIALS | sed 's/\./__/g' | sed 's/  */\\|/g')
+      grep -- "---\|$bundle_config_filter" ~/.bundle/config > /tmp/bundle_config
+      mv /tmp/bundle_config ~/.bundle/config
+    fi
+
   done
 
   log "Using ssh key: $VAULT_SSH_KEY"
@@ -90,9 +107,9 @@ if curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
 else
   log "ERROR: Start the ${VAULT_IMAGE} container before using ONVAULT!"
   document_args=""
-	if [[ "$VAULT_DIRS" != "ssh" ]]; then
-		document_args="${document_args} -e VAULT_DIRS='${VAULT_DIRS}'"
-	fi
+  if [[ "$VAULT_DIRS" != "ssh" ]]; then
+    document_args="${document_args} -e VAULT_DIRS='${VAULT_DIRS}'"
+  fi
   if [[ "$VAULT_PORT" = "tcp://${VAULT_HOST}:14242" ]]; then
     document_args="${document_args} -p ${VAULT_HOST}:14242:3000"
   fi
@@ -103,3 +120,5 @@ else
   log "ex: docker run -d${document_args} ${VAULT_IMAGE}"
   exit 1
 fi
+
+# vim: set ts=2 sw=2 tw=0 softtabstop=2 et :
