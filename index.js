@@ -32,8 +32,10 @@ app.get('/:keyDir\.tgz', function (req, res) {
     mkdirp("/vault/." + keyDir);
     exec('mktemp -q /tmp/key_dir.XXXXXX', function (err, stdout) {
       var file = stdout.match(/(.+)/)[0];
+			// the only place in .bundle directory for keys is the config file (which may have other bad stuff we'll deal with in ONVAULT)
+			var filespec = keyDir == 'bundle' ? './config' : '.'
 
-      exec('tar -chz -C /vault/.' + keyDir + ' -f '+ file +' .', function (err, stdout, stderr) {
+      exec('tar -chz -C /vault/.' + keyDir + ' -f '+ file + ' ' + filespec, function (err, stdout, stderr) {
         var filename = path.basename(file);
         var mimetype = mime.lookup(file);
 
