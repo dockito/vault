@@ -94,7 +94,7 @@ if curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
   export no_proxy="$no_proxy_old"
 
   log "Executing command: $@"
-  eval "$@"
+  "$@"
 
   log "Removing private keys..."
   for vault_dir in $VAULT_DIRS; do
