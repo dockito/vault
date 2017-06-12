@@ -38,19 +38,15 @@ log () {
   echo -e "${GREEN}[Dockito Vault]${NC} $@"
 }
 
+error () {
+  RED='\033[1;31m'
+  NC='\033[0m' # No Color
+  echo -e "${RED}[Dockito Vault]${NC} $@"
+}
+
 # don't go through proxy for accessing vault
 no_proxy_old="$no_proxy"
 export no_proxy="$VAULT_HOST"
-
-if ! curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
-  COUNTER=0
-  echo "Waiting 10s for ${VAULT_IMAGE} to be ready..."
-  while ! curl --connect-timeout 1 -s "${VAULT_URI}/_ping" && [ $COUNTER != 10 ]; do
-    sleep 1
-    COUNTER=$[$COUNTER +1]
-  done
-fi
-
 
 if curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
   log "Downloading private keys..."
@@ -105,7 +101,7 @@ if curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
   done
   rmdir $tmp_vault
 else
-  log "ERROR: Start the ${VAULT_IMAGE} container before using ONVAULT!"
+  error "ERROR: Start the ${VAULT_IMAGE} container before using ONVAULT using the following command:"
   document_args=""
   if [[ "$VAULT_DIRS" != "ssh" ]]; then
     document_args="${document_args} -e VAULT_DIRS='${VAULT_DIRS}'"
@@ -117,7 +113,7 @@ else
     document_args="${document_args} -v ~/.${vault_dir}:/vault/.${vault_dir}"
   done
 
-  log "ex: docker run -d${document_args} ${VAULT_IMAGE}"
+  error "  docker run -name vault -d${document_args} ${VAULT_IMAGE}"
   exit 1
 fi
 
