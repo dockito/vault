@@ -113,7 +113,7 @@ else
     document_args="${document_args} -v ~/.${vault_dir}:/vault/.${vault_dir}"
   done
 
-  error "  docker run -name vault -d${document_args} ${VAULT_IMAGE}"
+  error "  docker run --name vault -d${document_args} ${VAULT_IMAGE}"
   exit 1
 fi
 
