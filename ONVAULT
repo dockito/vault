@@ -57,8 +57,9 @@ if curl -s "${VAULT_URI}/_ping"; then
 
   log "Downloading private keys..."
   curl -s "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
-  chown -f `whoami` ~/.ssh/* || true
-  chmod -f 600 ~/.ssh/* || true
+  chown -fR `whoami` ~/.ssh/* || true
+  find ~/.ssh/* -type f | xargs chmod 600 || true
+  find ~/.ssh/* -type d | xargs chmod 700 || true
 
   log "Using ssh key: $VAULT_SSH_KEY"
   if [[  "$VAULT_SSH_KEY" != "id_rsa" ]]; then
