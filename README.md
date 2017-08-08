@@ -88,6 +88,7 @@ Some custom configurations are allowed through environment variables
 - `VAULT_PORT`: custom host+port for the vault server (example `tcp:172.17.0.1:14242`)
 - `VAULT_URI`: custom URI for the vault server (example `http://172.17.0.1:14242`)
 - `VAULT_SSH_KEY`: custom ssh key name used during `ONVAULT` command (example `id_rsa`)
+- `VAULT_SSH_CONFIG`: custom ssh config file used during `ONVAULT` command (example `config`)
 
 #### SSH config file
 
@@ -108,6 +109,9 @@ IdentityFile ~/.ssh/myprivatehost_key
 
 # otherwise will use the id_rsa key for any other host
 ```
+
+If platform-specific commands are in your `~/.ssh/config`, you can use the `VAULT_SSH_CONFIG` environment
+variable to specify an alternate file within the `~/.ssh` directory.
 
 #### SSH key password/passphrase
 
