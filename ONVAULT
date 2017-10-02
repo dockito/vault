@@ -16,6 +16,9 @@ set -e
 # allow overriding default VAULT_SSH_KEY at runtime
 : ${VAULT_SSH_KEY:=id_rsa}
 
+# allow overriding default VAULT_SSH_CONFIG at runtime
+: ${VAULT_SSH_CONFIG:=config}
+
 # parse arguments
 while [[ "$#" > 1 ]]; do case $1 in
     --disable-pwd) DISABLE_PASSWORD="$2";;
@@ -60,6 +63,15 @@ if curl -s "${VAULT_URI}/_ping"; then
   chown -f `whoami` ~/.ssh/* || true
   chmod -f 600 ~/.ssh/* || true
 
+  log "Using ssh config file: $VAULT_SSH_CONFIG"
+  if [[  "$VAULT_SSH_CONFIG" != "config" ]]; then
+    # configure the ssh config file
+    if [[ -f "~/.ssh/config" ]]; then
+      cp -p ~/.ssh/config ~/.ssh/config.bak
+    fi
+    mv ~/.ssh/$VAULT_SSH_CONFIG ~/.ssh/config
+  fi
+
   log "Using ssh key: $VAULT_SSH_KEY"
   if [[  "$VAULT_SSH_KEY" != "id_rsa" ]]; then
     # configure the ssh to any host to use this ssh key
@@ -67,7 +79,7 @@ if curl -s "${VAULT_URI}/_ping"; then
   fi
 
   if [[ "$DISABLE_PASSWORD" != "" ]]; then
-    ssh-keygen -p -P $DISABLE_PASSWORD -N "" -f ~/.ssh/$VAULT_SSH_KEY
+    ssh-keygen -p -P "$DISABLE_PASSWORD" -N "" -f ~/.ssh/$VAULT_SSH_KEY
   fi
 
   # restore 'no_proxy' for executing the actual command
