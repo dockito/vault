@@ -35,13 +35,13 @@ done
 log () {
   GREEN='\033[1;32m'
   NC='\033[0m' # No Color
-  echo -e "${GREEN}[Dockito Vault]${NC} $@"
+  >&2 echo -e "${GREEN}[Dockito Vault]${NC} $@"
 }
 
 error () {
   RED='\033[1;31m'
   NC='\033[0m' # No Color
-  echo -e "${RED}[Dockito Vault]${NC} $@"
+  >&2 echo -e "${RED}[Dockito Vault]${NC} $@"
 }
 
 # don't go through proxy for accessing vault
