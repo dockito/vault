@@ -16,6 +16,15 @@ set -e
 # allow overriding default VAULT_SSH_KEY at runtime
 : ${VAULT_SSH_KEY:=id_rsa}
 
+# allow multiple dot directories to be managed
+: ${VAULT_DIRS:=ssh}
+
+# just for documentation
+: ${VAULT_IMAGE:=dockito/vault}
+
+# allow multiple dot directories to be managed
+: ${VAULT_BUNDLE_CREDENTIALS:=}
+
 # parse arguments
 while [[ "$#" > 1 ]]; do case $1 in
     --disable-pwd) DISABLE_PASSWORD="$2";;
@@ -26,39 +35,46 @@ done
 log () {
   GREEN='\033[1;32m'
   NC='\033[0m' # No Color
-  echo -e "${GREEN}[Dockito Vault]${NC} $@"
+  >&2 echo -e "${GREEN}[Dockito Vault]${NC} $@"
+}
+
+error () {
+  RED='\033[1;31m'
+  NC='\033[0m' # No Color
+  >&2 echo -e "${RED}[Dockito Vault]${NC} $@"
 }
 
 # don't go through proxy for accessing vault
 no_proxy_old="$no_proxy"
 export no_proxy="$VAULT_HOST"
 
-if ! curl -s "${VAULT_URI}/_ping"; then
-  COUNTER=0
-  echo 'Waiting 10s for dockito/vault to be ready...'
-  while ! curl -s "${VAULT_URI}/_ping" && [ $COUNTER != 10 ]; do
-    sleep 1
-    COUNTER=$[$COUNTER +1]
-  done
-fi
-
-if curl -s "${VAULT_URI}/_ping"; then
-  mkdir -p ~/.ssh/
-
-  # check if is required the ssh backup
-  ssh_backup_enabled="$(ls -A ~/.ssh)"
-
-  # creating backup of existing ssh directory
-  if [[ -n "$ssh_backup_enabled" ]]; then
-    tmp_ssh_vault=~/".vault-backup-ssh-$(date +%s)"
-    mkdir $tmp_ssh_vault
-    cp -r ~/.ssh/* $tmp_ssh_vault
-  fi
-
+if curl --connect-timeout 1 -s "${VAULT_URI}/_ping"; then
   log "Downloading private keys..."
-  curl -s "${VAULT_URI}/ssh.tgz" | tar -C ~/.ssh/ -zxf -
-  chown -f `whoami` ~/.ssh/* || true
-  chmod -f 600 ~/.ssh/* || true
+  tmp_vault=~/".vault-backup-$(date +%s)"
+  mkdir $tmp_vault
+  for vault_dir in $VAULT_DIRS; do
+    if [[ -e ~/.${vault_dir} ]]; then
+      mv ~/.${vault_dir} ${tmp_vault}
+    fi
+    mkdir ~/.${vault_dir}
+
+    curl -s "${VAULT_URI}/${vault_dir}.tgz" | tar -C ~/.${vault_dir}/ -zxf -
+    chown -f `whoami` ~/.${vault_dir}/* || true
+    chmod -f 600 ~/.${vault_dir}/* || true
+
+    if [[ ${vault_dir} == bundle ]]; then
+      # more special handling of that nasty .bundle/config file. We ONLY want to bring over credentials, but the format
+      # for credentials is rather open-ended. Example: credentials for google.com would be stored as BUNDLE_GOOGLE__COM: "username:password"
+      # We solve this by allowing for a VAULT_BUNDLE_CREDENTIALS environment varialbe that is a space-deliminted list
+      # of gem server hostnames. This list will be transformed into these BUNDLE_HOSTNAME__WITH__UNDERLINES and used as a grep
+      # filter to filter out ALL OTHER lines in the ~/.bundle config. We do not want actual bundler configuration items
+      # such as BUNDLE_BUILD... or BUNDLE_PATH... or BUNDLE_WITHOUT to affect our build.
+      bundle_config_filter=$(tr '[:lower:]' '[:upper:]' <<< $VAULT_BUNDLE_CREDENTIALS | sed 's/\./__/g' | sed 's/  */\\|/g')
+      grep -- "---\|$bundle_config_filter" ~/.bundle/config > /tmp/bundle_config
+      mv /tmp/bundle_config ~/.bundle/config
+    fi
+
+  done
 
   log "Using ssh key: $VAULT_SSH_KEY"
   if [[  "$VAULT_SSH_KEY" != "id_rsa" ]]; then
@@ -74,18 +90,31 @@ if curl -s "${VAULT_URI}/_ping"; then
   export no_proxy="$no_proxy_old"
 
   log "Executing command: $@"
-  eval $@
+  "$@"
 
   log "Removing private keys..."
-  rm -rf ~/.ssh/*
-
-  # copying backup to ssh directory
-  if [[ -n "$ssh_backup_enabled" ]]; then
-    cp -r $tmp_ssh_vault/* ~/.ssh
-    rm -rf $tmp_ssh_vault
-  fi
+  for vault_dir in $VAULT_DIRS; do
+    rm -rf ~/.${vault_dir}
+    if [[ -e ${tmp_vault}/.${vault_dir} ]]; then
+      mv ${tmp_vault}/.${vault_dir} ~
+    fi
+  done
+  rmdir $tmp_vault
 else
-  log "ERROR: Start the dockito/vault container before using ONVAULT!"
-  log "ex: docker run -d -p ${VAULT_HOST}:14242:3000 -v ~/.ssh:/vault/.ssh dockito/vault"
+  error "ERROR: Start the ${VAULT_IMAGE} container before using ONVAULT using the following command:"
+  document_args=""
+  if [[ "$VAULT_DIRS" != "ssh" ]]; then
+    document_args="${document_args} -e VAULT_DIRS='${VAULT_DIRS}'"
+  fi
+  if [[ "$VAULT_PORT" = "tcp://${VAULT_HOST}:14242" ]]; then
+    document_args="${document_args} -p ${VAULT_HOST}:14242:3000"
+  fi
+  for vault_dir in $VAULT_DIRS; do
+    document_args="${document_args} -v ~/.${vault_dir}:/vault/.${vault_dir}"
+  done
+
+  error "  docker run --name vault -d${document_args} ${VAULT_IMAGE}"
   exit 1
 fi
+
+# vim: set ts=2 sw=2 tw=0 softtabstop=2 et :
