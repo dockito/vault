@@ -2,7 +2,8 @@ var express = require('express'),
     fs = require('fs'),
     exec = require('child_process').exec,
     mime = require('mime'),
-    path = require('path');
+    path = require('path'),
+    mkdirp = require('mkdirp');
 
 
 var host = process.env.HTTP_HOST || '0.0.0.0';
@@ -21,10 +22,11 @@ app.get('/_ping', function (req, res) {
   Bundle containing all the user's private keys and ssh configuration
  */
 app.get('/ssh.tgz', function (req, res) {
+  mkdirp("/vault/.ssh");
   exec('mktemp -q /tmp/ssh.XXXXXX', function (err, stdout) {
     var file = stdout.match(/(.+)/)[0];
 
-    exec('tar -c -z -C /vault/.ssh -f '+ file +' .', function (err, stdout, stderr) {
+    exec('tar -chz -C /vault/.ssh -f '+ file +' .', function (err, stdout, stderr) {
       var filename = path.basename(file);
       var mimetype = mime.lookup(file);
 
@@ -33,6 +35,7 @@ app.get('/ssh.tgz', function (req, res) {
 
       var filestream = fs.createReadStream(file);
       filestream.pipe(res);
+      fs.unlink(file)
     });
   });
 });
